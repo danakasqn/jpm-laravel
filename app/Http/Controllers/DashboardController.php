@@ -14,7 +14,7 @@ class DashboardController extends Controller
         $today = Carbon::today();
         $soon = $today->copy()->addDays(14);
 
-        // ✅ Tutaj ustaw swoją ręczną datę początkową:
+        // ✅ Ustalony punkt startowy aplikacji
         $appStartDate = Carbon::create(2025, 5, 1)->startOfMonth();
 
         // 📅 Umowy kończące się w ciągu 14 dni
@@ -24,7 +24,7 @@ class DashboardController extends Controller
             ->orderBy('do_kiedy')
             ->get();
 
-        // 📌 Zaległe płatności cykliczne od ręcznej daty początkowej do obecnego miesiąca
+        // 📌 Zaległe płatności cykliczne (od startu do bieżącego miesiąca)
         $missingCyclicFinances = collect();
 
         $currentMonth = $appStartDate->copy();
@@ -39,7 +39,7 @@ class DashboardController extends Controller
                 ->filter(function ($cyclic) use ($startOfMonth, $endOfMonth) {
                     return !Finance::where('kategoria', $cyclic->title)
                         ->where('typ', $cyclic->type === 'income' ? 'Przychód' : 'Wydatek')
-                        ->where('mieszkanie', $cyclic->apartment_id)
+                        ->where('apartment_id', $cyclic->apartment_id) // ✅ poprawione
                         ->whereBetween('data', [$startOfMonth, $endOfMonth])
                         ->exists();
                 })
@@ -51,7 +51,6 @@ class DashboardController extends Controller
                 });
 
             $missingCyclicFinances = $missingCyclicFinances->merge($cyclicFinances);
-
             $currentMonth->addMonth();
         }
 

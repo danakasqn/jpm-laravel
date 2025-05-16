@@ -3,17 +3,20 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\Mieszkanie;
 
 class Finance extends Model
 {
-    // Jeśli tabela nie nazywa się "finances", dodaj:
+    use HasFactory;
+
+    // Jeśli tabela nazywa się inaczej niż domyślna (czyli "finances"), odkomentuj poniższe:
     // protected $table = 'finances';
 
     protected $fillable = [
         'user_id',
         'data',
-        'apartment_id', // poprawnie zgodnie z kolumną w migracji
+        'apartment_id', // poprawne pole powiązania
         'typ',
         'kwota',
         'kategoria',
@@ -21,7 +24,7 @@ class Finance extends Model
     ];
 
     /**
-     * Relacja z tabelą mieszkań.
+     * Relacja: jedno finansowanie należy do jednego mieszkania.
      */
     public function apartment()
     {

@@ -16,7 +16,6 @@ class FinanceController extends BaseController
 
     public function index(Request $request)
     {
-        // Obsługa zapisania formularza w tym samym widoku
         if ($request->_action === 'zapisz') {
             return $this->zapisz($request);
         }
@@ -33,7 +32,7 @@ class FinanceController extends BaseController
             $query->where('typ', $request->typ);
         }
 
-        if ($request->filled('apartment_id')) { // poprawione: było "mieszkanie"
+        if ($request->filled('apartment_id')) {
             $query->where('apartment_id', $request->apartment_id);
         }
 
@@ -65,8 +64,6 @@ class FinanceController extends BaseController
             'apartments'
         ));
     }
-
-    // USUWAMY formularz() – niepotrzebny, widok jest zintegrowany z index()
 
     public function zapisz(Request $request)
     {

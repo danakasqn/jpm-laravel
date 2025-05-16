@@ -9,22 +9,32 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
         Schema::create('finances', function (Blueprint $table) {
             $table->id();
+
+            // Powiązania
             $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('apartment_id')->nullable(); // <- powiązanie z mieszkanie
+            $table->unsignedBigInteger('apartment_id')->nullable();
+
+            // Dane finansowe
             $table->date('data');
             $table->string('typ'); // Przychód lub Wydatek
             $table->decimal('kwota', 10, 2);
             $table->string('kategoria')->nullable();
             $table->text('notatka')->nullable();
+
             $table->timestamps();
 
-            // Relacje
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('apartment_id')->references('id')->on('mieszkania')->onDelete('set null');
+            // Relacje (klucze obce)
+            $table->foreign('user_id')
+                ->references('id')->on('users')
+                ->onDelete('cascade');
+
+            $table->foreign('apartment_id')
+                ->references('id')->on('mieszkania')
+                ->onDelete('set null');
         });
     }
 

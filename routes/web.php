@@ -8,6 +8,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ResidentController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CyclicFinanceController;
+use App\Http\Controllers\MapController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -28,10 +29,10 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('cyclic-finances', CyclicFinanceController::class);
 
     // ✅ Finanse
-    Route::post('/finanse/zapisz', [FinanceController::class, 'zapisz'])->name('finanse.zapisz');      // Zapis
-    Route::get('/finanse/edytuj/{id}', [FinanceController::class, 'edytuj'])->name('finanse.edytuj');   // Edycja
-    Route::put('/finanse/aktualizuj/{id}', [FinanceController::class, 'aktualizuj'])->name('finanse.aktualizuj'); // Aktualizacja
-    Route::delete('/finanse/{id}', [FinanceController::class, 'usun'])->name('finanse.usun');           // Usunięcie
+    Route::post('/finanse/zapisz', [FinanceController::class, 'zapisz'])->name('finanse.zapisz');      
+    Route::get('/finanse/edytuj/{id}', [FinanceController::class, 'edytuj'])->name('finanse.edytuj');   
+    Route::put('/finanse/aktualizuj/{id}', [FinanceController::class, 'aktualizuj'])->name('finanse.aktualizuj');
+    Route::delete('/finanse/{id}', [FinanceController::class, 'usun'])->name('finanse.usun');           
 
     // ✅ Mieszkania
     Route::get('/mieszkania', [MieszkanieController::class, 'index'])->name('mieszkania.index');

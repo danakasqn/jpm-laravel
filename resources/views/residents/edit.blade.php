@@ -1,46 +1,52 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-xl mx-auto p-6 bg-white shadow-md rounded">
-    <h2 class="text-xl font-bold mb-4">Edytuj najemcę</h2>
+<div class="container-fluid">
+    <h3 class="mb-4 fw-semibold">✏️ Edytuj najemcę</h3>
 
-    <form method="POST" action="{{ route('residents.update', $resident->id) }}">
-        @csrf
-        @method('PUT')
+    <div class="card shadow-sm mx-auto" style="max-width: 700px;">
+        <div class="card-body">
+            <form method="POST" action="{{ route('residents.update', $resident->id) }}">
+                @csrf
+                @method('PUT')
 
-        <div class="mb-4">
-            <label class="block mb-1 font-semibold">Imię i nazwisko</label>
-            <input type="text" name="imie_nazwisko" value="{{ $resident->imie_nazwisko }}" class="w-full border rounded px-3 py-2" required>
+                <div class="mb-3">
+                    <label class="form-label">Imię i nazwisko</label>
+                    <input type="text" name="imie_nazwisko" value="{{ $resident->imie_nazwisko }}" class="form-control" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Mieszkanie</label>
+                    <select name="apartment_id" class="form-select" required>
+                        @foreach($mieszkania as $mieszkanie)
+                            <option value="{{ $mieszkanie->id }}" @if($resident->apartment_id == $mieszkanie->id) selected @endif>
+                                {{ $mieszkanie->miasto }}, {{ $mieszkanie->ulica }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="row mb-3 g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Data rozpoczęcia</label>
+                        <input type="date" name="od_kiedy" value="{{ $resident->od_kiedy }}" class="form-control" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Data zakończenia</label>
+                        <input type="date" name="do_kiedy" value="{{ $resident->do_kiedy }}" class="form-control">
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label">Komentarz</label>
+                    <textarea name="komentarz" class="form-control" rows="3" style="resize: vertical;">{{ old('komentarz', $resident->komentarz) }}</textarea>
+                </div>
+
+                <div class="text-end">
+                    <button type="submit" class="btn btn-success">💾 Zapisz zmiany</button>
+                </div>
+            </form>
         </div>
-
-        <div class="mb-4">
-            <label class="block mb-1 font-semibold">Mieszkanie</label>
-            <select name="apartment_id" class="w-full border rounded px-3 py-2" required>
-                @foreach($mieszkania as $mieszkanie)
-                    <option value="{{ $mieszkanie->id }}" @if($resident->apartment_id == $mieszkanie->id) selected @endif>
-                        {{ $mieszkanie->miasto }}, {{ $mieszkanie->ulica }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-
-        <div class="mb-4">
-            <label class="block mb-1 font-semibold">Od kiedy</label>
-            <input type="date" name="od_kiedy" value="{{ $resident->od_kiedy }}" class="w-full border rounded px-3 py-2" required>
-        </div>
-
-        <div class="mb-4">
-            <label class="block mb-1 font-semibold">Do kiedy</label>
-            <input type="date" name="do_kiedy" value="{{ $resident->do_kiedy }}" class="w-full border rounded px-3 py-2">
-        </div>
-
-        <div class="mb-4">
-            <label class="block mb-1 font-semibold">Komentarz</label>
-            <textarea name="komentarz" class="w-full border rounded px-3 py-2 resize-none"
-                      rows="2" oninput="this.style.height='';this.style.height=this.scrollHeight + 'px'">{{ old('komentarz', $resident->komentarz) }}</textarea>
-        </div>
-
-        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Zapisz zmiany</button>
-    </form>
+    </div>
 </div>
 @endsection

@@ -1,9 +1,8 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container py-4">
-
-    <h2 class="mb-4 h4 fw-bold">Edycja mieszkania</h2>
+<div class="container-fluid">
+    <h3 class="mb-4 fw-semibold">✏️ Edytuj lokal</h3>
 
     @if ($errors->any())
         <div class="alert alert-danger">
@@ -15,7 +14,7 @@
         </div>
     @endif
 
-    <div class="card">
+    <div class="card shadow-sm">
         <div class="card-body">
             <form method="POST" action="{{ route('mieszkania.aktualizuj', $mieszkanie->id) }}">
                 @csrf
@@ -48,17 +47,16 @@
                     </div>
                     <div class="col-md-12">
                         <label class="form-label">Komentarz</label>
-                        <textarea name="notatka" class="form-control" rows="4" style="resize: vertical;">{{ old('notatka', $mieszkanie->notatka) }}</textarea>
+                        <textarea name="notatka" class="form-control" rows="4">{{ old('notatka', $mieszkanie->notatka) }}</textarea>
                     </div>
                 </div>
 
-                <div class="mt-4 d-flex justify-content-between">
-                    <a href="{{ route('mieszkania.index') }}" class="btn btn-secondary">← Wróć</a>
-                    <button type="submit" class="btn btn-success">Zapisz zmiany</button>
+                <div class="mt-4 text-end">
+                    <a href="{{ route('mieszkania.index') }}" class="btn btn-outline-secondary me-2">← Wróć</a>
+                    <button type="submit" class="btn btn-success">💾 Zapisz zmiany</button>
                 </div>
             </form>
         </div>
     </div>
-
 </div>
 @endsection

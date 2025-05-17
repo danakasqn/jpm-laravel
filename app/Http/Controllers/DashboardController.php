@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Resident;
 use App\Models\Finance;
+use App\Models\Mieszkanie;
 use App\Models\CyclicFinance;
 use Carbon\Carbon;
 
@@ -13,8 +14,6 @@ class DashboardController extends Controller
     {
         $today = Carbon::today();
         $soon = $today->copy()->addDays(14);
-
-        // ✅ Ustalony punkt startowy aplikacji
         $appStartDate = Carbon::create(2025, 5, 1)->startOfMonth();
 
         // 📅 Umowy kończące się w ciągu 14 dni
@@ -24,9 +23,8 @@ class DashboardController extends Controller
             ->orderBy('do_kiedy')
             ->get();
 
-        // 📌 Zaległe płatności cykliczne (od startu do bieżącego miesiąca)
+        // 🔁 Zaległe płatności cykliczne
         $missingCyclicFinances = collect();
-
         $currentMonth = $appStartDate->copy();
         $endMonth = $today->copy()->startOfMonth();
 
@@ -39,7 +37,7 @@ class DashboardController extends Controller
                 ->filter(function ($cyclic) use ($startOfMonth, $endOfMonth) {
                     return !Finance::where('kategoria', $cyclic->title)
                         ->where('typ', $cyclic->type === 'income' ? 'Przychód' : 'Wydatek')
-                        ->where('apartment_id', $cyclic->apartment_id) // ✅ poprawione
+                        ->where('apartment_id', $cyclic->apartment_id)
                         ->whereBetween('data', [$startOfMonth, $endOfMonth])
                         ->exists();
                 })
@@ -54,6 +52,30 @@ class DashboardController extends Controller
             $currentMonth->addMonth();
         }
 
-        return view('dashboard', compact('endingSoonResidents', 'missingCyclicFinances'));
+        // 📊 Statystyki bieżącego miesiąca
+        $startOfMonth = Carbon::now()->startOfMonth();
+        $endOfMonth = Carbon::now()->endOfMonth();
+
+        $monthlyIncomes = Finance::where('typ', 'Przychód')
+            ->whereBetween('data', [$startOfMonth, $endOfMonth])
+            ->sum('kwota');
+
+        $monthlyExpenses = Finance::where('typ', 'Wydatek')
+            ->whereBetween('data', [$startOfMonth, $endOfMonth])
+            ->sum('kwota');
+
+        $monthlyProfit = $monthlyIncomes - $monthlyExpenses;
+
+        // 🏠 Mieszkania do mapy
+        $mieszkania = Mieszkanie::all();
+
+        return view('dashboard', compact(
+            'endingSoonResidents',
+            'missingCyclicFinances',
+            'monthlyIncomes',
+            'monthlyExpenses',
+            'monthlyProfit',
+            'mieszkania'
+        ));
     }
 }

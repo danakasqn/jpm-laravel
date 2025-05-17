@@ -29,10 +29,10 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('cyclic-finances', CyclicFinanceController::class);
 
     // ✅ Finanse
-    Route::post('/finanse/zapisz', [FinanceController::class, 'zapisz'])->name('finanse.zapisz');      
-    Route::get('/finanse/edytuj/{id}', [FinanceController::class, 'edytuj'])->name('finanse.edytuj');   
+    Route::post('/finanse/zapisz', [FinanceController::class, 'zapisz'])->name('finanse.zapisz');
+    Route::get('/finanse/edytuj/{id}', [FinanceController::class, 'edytuj'])->name('finanse.edytuj');
     Route::put('/finanse/aktualizuj/{id}', [FinanceController::class, 'aktualizuj'])->name('finanse.aktualizuj');
-    Route::delete('/finanse/{id}', [FinanceController::class, 'usun'])->name('finanse.usun');           
+    Route::delete('/finanse/{id}', [FinanceController::class, 'usun'])->name('finanse.usun');
 
     // ✅ Mieszkania
     Route::get('/mieszkania', [MieszkanieController::class, 'index'])->name('mieszkania.index');
@@ -42,7 +42,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/mieszkania/{id}', [MieszkanieController::class, 'usun'])->name('mieszkania.usun');
 
     // ✅ Mieszkańcy
-    Route::resource('/residents', ResidentController::class);
+    Route::resource('/residents', ResidentController::class); // 🔄 Generuje też residents.edit automatycznie
 
     // ✅ Profil użytkownika
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

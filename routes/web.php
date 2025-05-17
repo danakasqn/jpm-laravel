@@ -43,7 +43,6 @@ Route::middleware(['auth'])->group(function () {
 
     // ✅ Mieszkańcy
     Route::resource('/residents', ResidentController::class);
-    Route::get('/mieszkancy/{resident}/edit', [ResidentController::class, 'edit'])->name('residents.edit');
 
     // ✅ Profil użytkownika
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

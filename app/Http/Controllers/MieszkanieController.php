@@ -15,27 +15,20 @@ class MieszkanieController extends Controller
 
     public function zapisz(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'miasto' => 'required|string|max:255',
             'ulica' => 'required|string|max:255',
             'metraz' => 'required|numeric|min:0',
             'wspolnota' => 'required|string|max:255',
             'telefon' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:255',
-            'adres' => 'nullable|string|max:255',
             'notatka' => 'nullable|string|max:1000',
         ]);
 
-        Mieszkanie::create($request->only([
-            'miasto',
-            'ulica',
-            'metraz',
-            'wspolnota',
-            'telefon',
-            'email',
-            'adres',
-            'notatka',
-        ]));
+        // Dodaj dynamicznie adres
+        $validated['adres'] = $validated['miasto'] . ', ' . $validated['ulica'];
+
+        Mieszkanie::create($validated);
 
         return redirect()->route('mieszkania.index')->with('sukces', 'Dodano mieszkanie.');
     }
@@ -48,28 +41,21 @@ class MieszkanieController extends Controller
 
     public function aktualizuj(Request $request, $id)
     {
-        $request->validate([
+        $validated = $request->validate([
             'miasto' => 'required|string|max:255',
             'ulica' => 'required|string|max:255',
             'metraz' => 'required|numeric|min:0',
             'wspolnota' => 'required|string|max:255',
             'telefon' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:255',
-            'adres' => 'nullable|string|max:255',
             'notatka' => 'nullable|string|max:1000',
         ]);
 
+        // Dodaj dynamicznie adres
+        $validated['adres'] = $validated['miasto'] . ', ' . $validated['ulica'];
+
         $mieszkanie = Mieszkanie::findOrFail($id);
-        $mieszkanie->update($request->only([
-            'miasto',
-            'ulica',
-            'metraz',
-            'wspolnota',
-            'telefon',
-            'email',
-            'adres',
-            'notatka',
-        ]));
+        $mieszkanie->update($validated);
 
         return redirect()->route('mieszkania.index')->with('sukces', 'Zaktualizowano dane mieszkania.');
     }

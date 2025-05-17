@@ -14,6 +14,7 @@ class Resident extends Model
         'apartment_id',
         'od_kiedy',
         'do_kiedy',
+        'komentarz', // ✅ Dodane pole
         'email',
         'phone',
     ];

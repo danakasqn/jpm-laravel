@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Finance;
 use App\Models\Mieszkanie;
+use App\Models\CyclicFinance;
 use Illuminate\Routing\Controller as BaseController;
 
 class FinanceController extends BaseController
@@ -14,15 +15,18 @@ class FinanceController extends BaseController
         $this->middleware('auth');
     }
 
-    public function index(Request $request)
+    public function index()
+    {
+        return redirect()->route('finanse.formularz');
+    }
+
+    public function formularz(Request $request)
     {
         if ($request->_action === 'zapisz') {
             return $this->zapisz($request);
         }
 
-        $userId = auth()->id();
-
-        $query = Finance::with('apartment')->where('user_id', $userId);
+        $query = Finance::with('apartment');
 
         if ($request->filled('data')) {
             $query->whereDate('data', $request->data);
@@ -48,6 +52,14 @@ class FinanceController extends BaseController
             $query->where('kwota', $request->kwota);
         }
 
+        if ($request->filled('data_od')) {
+            $query->whereDate('data', '>=', $request->data_od);
+        }
+
+        if ($request->filled('data_do')) {
+            $query->whereDate('data', '<=', $request->data_do);
+        }
+
         $finanse = $query->latest()->get();
 
         $sumaPrzychodow = $finanse->where('typ', 'Przychód')->sum('kwota');
@@ -56,13 +68,42 @@ class FinanceController extends BaseController
 
         $apartments = Mieszkanie::all();
 
-        return view('finanse.index', compact(
+        return view('finanse.formularz', compact(
             'finanse',
             'sumaPrzychodow',
             'sumaWydatkow',
             'bilans',
             'apartments'
         ));
+    }
+
+    public function operacjeDoWykonania()
+    {
+        $today = now();
+        $start = $today->copy()->startOfMonth()->toDateString();
+        $end = $today->copy()->endOfMonth()->toDateString();
+
+        $missingCyclicFinances = CyclicFinance::with('apartment')
+            ->get()
+            ->filter(function ($cyclic) use ($start, $end) {
+                return !Finance::whereRaw('LOWER(kategoria) = ?', [strtolower($cyclic->title)])
+                    ->where('typ', $cyclic->type === 'income' ? 'Przychód' : 'Wydatek')
+                    ->where('apartment_id', $cyclic->apartment_id)
+                    ->whereBetween('data', [$start, $end])
+                    ->exists();
+            })
+            ->map(function ($cyclic) use ($today) {
+                return (object)[
+                    'typ' => $cyclic->type === 'income' ? 'Przychód' : 'Wydatek',
+                    'kwota' => 0,
+                    'kategoria' => $cyclic->title,
+                    'data' => $today->copy()->setDay(min($cyclic->due_day, $today->daysInMonth))->toDateString(),
+                    'apartment' => $cyclic->apartment,
+                    'id' => null
+                ];
+            });
+
+        return view('finanse.operacje', ['pending' => $missingCyclicFinances]);
     }
 
     public function zapisz(Request $request)
@@ -77,17 +118,18 @@ class FinanceController extends BaseController
         ]);
 
         $validated['user_id'] = auth()->id();
+        $validated['status'] = 'pending';
 
         Finance::create($validated);
 
-        return redirect()->route('finanse.index')->with('sukces', 'Dodano wpis.');
+        return redirect()->route('finanse.formularz')->with('sukces', 'Dodano wpis.');
     }
 
     public function usun($id)
     {
         Finance::where('user_id', auth()->id())->where('id', $id)->delete();
 
-        return redirect()->route('finanse.index')->with('sukces', 'Wpis usunięty.');
+        return redirect()->route('finanse.formularz')->with('sukces', 'Wpis usunięty.');
     }
 
     public function edytuj($id)
@@ -113,6 +155,14 @@ class FinanceController extends BaseController
 
         $rekord->update($validated);
 
-        return redirect()->route('finanse.index')->with('sukces', 'Rekord został zaktualizowany.');
+        return redirect()->route('finanse.formularz')->with('sukces', 'Rekord został zaktualizowany.');
+    }
+
+    public function oznaczJakoWykonane($id)
+    {
+        $rekord = Finance::findOrFail($id);
+        $rekord->update(['status' => 'done']);
+
+        return redirect()->route('finanse.operacje')->with('sukces', 'Operacja oznaczona jako wykonana.');
     }
 }

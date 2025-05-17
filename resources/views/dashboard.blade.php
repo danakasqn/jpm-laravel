@@ -81,45 +81,30 @@
         </div>
     </div>
 
-    {{-- === SEKCJE RÓWNOLEGŁE: Płatności | Umowy === --}}
+    {{-- === SEKCJE RÓWNOLEGŁE === --}}
     <div class="row g-4">
-        {{-- Zaległe płatności cykliczne --}}
+        {{-- 🔔 Przypomnienie o płatnościach --}}
         <div class="col-md-6">
             <h6 class="text-muted text-uppercase fw-bold mb-3">
-                <i class="bi bi-arrow-repeat me-2 text-primary"></i>
-                Zaległe operacje cykliczne
+                <i class="bi bi-bell-fill me-2 text-warning"></i>
+                Przypomnienie o płatnościach
             </h6>
 
-            @if($missingCyclicFinances->isEmpty())
-                <div class="alert alert-success">Brak zaległych cyklicznych operacji.</div>
-            @else
-                @foreach($missingCyclicFinances as $item)
-                    <div class="bg-white border rounded shadow-sm p-3 mb-3">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <div class="mb-1">
-                                    <span class="text-warning">💡</span>
-                                    <strong>{{ $item['cyclic']->title }}</strong>
-                                    ({{ $item['cyclic']->type === 'income' ? 'Przychód' : 'Wydatek' }})
-                                </div>
-                                <div>
-                                    Miesiąc: <strong>{{ $item['month']->format('m.Y') }}</strong><br>
-                                    Lokal: <span class="fw-semibold text-dark">
-                                        {{ $item['cyclic']->apartment->miasto ?? '-' }},
-                                        {{ $item['cyclic']->apartment->ulica ?? '' }}
-                                    </span><br>
-                                    Termin: <strong>
-                                        {{ str_pad($item['cyclic']->due_day, 2, '0', STR_PAD_LEFT) }}.{{ $item['month']->format('m.Y') }}
-                                    </strong>
-                                </div>
-                            </div>
-                            <a href="{{ route('finanse.index') }}" class="btn btn-sm btn-outline-warning">
-                                ➕ Dodaj płatność
-                            </a>
-                        </div>
+            <div class="bg-white border rounded shadow-sm p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="mb-1">
+                            Pozostało <strong>{{ $missingCyclicFinances->count() }}</strong> operacji finansowych do wykonania.
+                        </p>
+                        <p class="mb-0">
+                            Najbliższy termin to: <strong>{{ $nextDueDate }}</strong>
+                        </p>
                     </div>
-                @endforeach
-            @endif
+                    <a href="{{ route('finanse.operacje') }}" class="btn btn-outline-primary btn-sm">
+                        ➡️ Przejdź
+                    </a>
+                </div>
+            </div>
         </div>
 
         {{-- Umowy kończące się --}}

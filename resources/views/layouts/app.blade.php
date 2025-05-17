@@ -35,6 +35,7 @@
             width: 280px;
             color: white;
             min-height: 100vh;
+            transition: left 0.3s ease;
         }
 
         .sidebar .nav-link {
@@ -95,15 +96,10 @@
             border-radius: 50%;
         }
 
-        .user-box .info {
-            overflow: hidden;
-        }
-
         .user-box .info .name {
             font-weight: 600;
             font-size: 0.95rem;
             color: #fff;
-            white-space: nowrap;
         }
 
         .user-box .info .email {
@@ -120,28 +116,62 @@
             flex-grow: 1;
         }
 
+        .mobile-toggle {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #333;
+        }
+
         @media (max-width: 768px) {
             .sidebar {
-                display: none;
+                position: fixed;
+                left: -100%;
+                top: 0;
+                width: 240px;
+                height: 100vh;
+                background-color: #1e293b;
+                z-index: 999;
+                display: block;
+            }
+
+            .sidebar.active {
+                left: 0;
             }
 
             .topbar {
-                justify-content: center;
+                justify-content: space-between;
             }
+
+            .mobile-toggle {
+                display: inline-block;
+            }
+
+            main {
+                margin-left: 0 !important;
+                padding: 1rem;
+            }
+        }
+
+        .dot {
+            height: 8px;
+            width: 8px;
+            background-color: red;
+            border-radius: 50%;
+            display: inline-block;
+            margin-left: 6px;
         }
     </style>
 </head>
 <body>
 <div class="d-flex">
     <!-- Sidebar -->
-    <aside class="sidebar d-flex flex-column p-3">
-        <!-- Logo -->
+    <aside class="sidebar d-flex flex-column p-3" id="sidebar">
         <div class="text-center mb-4">
             <img src="{{ asset('images/logo.png') }}" alt="Logo" class="logo-img mx-auto d-block">
             <div class="text-light fw-semibold mt-2 small">Property Manager</div>
         </div>
 
-        <!-- Użytkownik -->
         <div class="user-box">
             <div class="position-relative">
                 <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name ?? 'User') }}&background=0D8ABC&color=fff" alt="Avatar">
@@ -160,6 +190,7 @@
     <div class="flex-grow-1 d-flex flex-column">
         <!-- Topbar -->
         <div class="topbar">
+            <span id="mobile-toggle-btn" class="mobile-toggle d-md-none"><i class="bi bi-list"></i></span>
             <h5 class="mb-0">Panel Główny</h5>
             <div class="dropdown">
                 <button class="btn btn-sm bg-white border-0 p-0" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
@@ -191,5 +222,17 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const toggle = document.getElementById("mobile-toggle-btn");
+        const sidebar = document.getElementById("sidebar");
+
+        if (toggle && sidebar) {
+            toggle.addEventListener("click", () => {
+                sidebar.classList.toggle("active");
+            });
+        }
+    });
+</script>
 </body>
 </html>

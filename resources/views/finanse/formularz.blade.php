@@ -67,7 +67,7 @@
     <div class="card mb-4">
         <div class="card-header fw-bold">🔍 Filtruj wpisy</div>
         <div class="card-body">
-            <form method="GET" action="{{ route('finanse.index') }}">
+            <form method="GET" action="{{ route('finanse.formularz') }}">
                 <div class="row g-3">
                     <div class="col-md-3">
                         <select name="apartment_id" class="form-select">
@@ -109,7 +109,7 @@
 
                     <div class="col-md-12 d-flex gap-2">
                         <button type="submit" class="btn btn-secondary">Filtruj</button>
-                        <a href="{{ route('finanse.index') }}" class="btn btn-outline-secondary">Reset</a>
+                        <a href="{{ route('finanse.formularz') }}" class="btn btn-outline-secondary">Reset</a>
                     </div>
                 </div>
             </form>

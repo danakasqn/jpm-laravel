@@ -19,20 +19,23 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
-// ✅ Finanse – dostęp do listy
-Route::get('/finanse', [FinanceController::class, 'index'])->name('finanse.index');
-
 // 🔐 Trasy dostępne tylko po zalogowaniu
 Route::middleware(['auth'])->group(function () {
 
-    // ✅ Finanse cykliczne
-    Route::resource('cyclic-finances', CyclicFinanceController::class);
+    // ✅ Finanse – główna + formularz + operacje
+    Route::get('/finanse', [FinanceController::class, 'index'])->name('finanse.index');
+    Route::get('/finanse/formularz', [FinanceController::class, 'formularz'])->name('finanse.formularz');
+    Route::get('/finanse/operacje', [FinanceController::class, 'operacjeDoWykonania'])->name('finanse.operacje');
+    Route::patch('/finanse/zamknij/{id}', [FinanceController::class, 'oznaczJakoWykonane'])->name('finanse.zamknij');
 
-    // ✅ Finanse
+    // ✅ Finanse – CRUD
     Route::post('/finanse/zapisz', [FinanceController::class, 'zapisz'])->name('finanse.zapisz');
     Route::get('/finanse/edytuj/{id}', [FinanceController::class, 'edytuj'])->name('finanse.edytuj');
     Route::put('/finanse/aktualizuj/{id}', [FinanceController::class, 'aktualizuj'])->name('finanse.aktualizuj');
     Route::delete('/finanse/{id}', [FinanceController::class, 'usun'])->name('finanse.usun');
+
+    // ✅ Finanse cykliczne
+    Route::resource('cyclic-finances', CyclicFinanceController::class);
 
     // ✅ Mieszkania
     Route::get('/mieszkania', [MieszkanieController::class, 'index'])->name('mieszkania.index');
@@ -42,7 +45,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/mieszkania/{id}', [MieszkanieController::class, 'usun'])->name('mieszkania.usun');
 
     // ✅ Mieszkańcy
-    Route::resource('/residents', ResidentController::class); // 🔄 Generuje też residents.edit automatycznie
+    Route::resource('/residents', ResidentController::class);
 
     // ✅ Profil użytkownika
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

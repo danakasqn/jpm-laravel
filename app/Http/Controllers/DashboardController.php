@@ -16,14 +16,14 @@ class DashboardController extends Controller
         $soon = $today->copy()->addDays(14);
         $appStartDate = Carbon::create(2025, 5, 1)->startOfMonth();
 
-        // 📅 Umowy kończące się w ciągu 14 dni
+        // Umowy kończące się w ciągu 14 dni
         $endingSoonResidents = Resident::with('apartment')
             ->whereNotNull('do_kiedy')
             ->whereBetween('do_kiedy', [$today, $soon])
             ->orderBy('do_kiedy')
             ->get();
 
-        // 🔁 Zaległe płatności cykliczne
+        // Zaległe płatności cykliczne
         $missingCyclicFinances = collect();
         $currentMonth = $appStartDate->copy();
         $endMonth = $today->copy()->startOfMonth();
@@ -35,7 +35,7 @@ class DashboardController extends Controller
             $cyclicFinances = CyclicFinance::with('apartment')
                 ->get()
                 ->filter(function ($cyclic) use ($startOfMonth, $endOfMonth) {
-                    return !Finance::where('kategoria', $cyclic->title)
+                    return !Finance::whereRaw('LOWER(kategoria) = ?', [strtolower($cyclic->title)])
                         ->where('typ', $cyclic->type === 'income' ? 'Przychód' : 'Wydatek')
                         ->where('apartment_id', $cyclic->apartment_id)
                         ->whereBetween('data', [$startOfMonth, $endOfMonth])
@@ -52,21 +52,37 @@ class DashboardController extends Controller
             $currentMonth->addMonth();
         }
 
-        // 📊 Statystyki bieżącego miesiąca
+        $nextDueDate = $missingCyclicFinances
+            ->sortBy(function ($item) {
+                return $item['month']->copy()->setDay($item['cyclic']->due_day);
+            })
+            ->first();
+
+        $nextDueDate = $nextDueDate
+            ? $nextDueDate['month']->copy()->setDay($nextDueDate['cyclic']->due_day)->format('d.m.Y')
+            : '—';
+
+        // Statystyki bieżącego miesiąca
         $startOfMonth = Carbon::now()->startOfMonth();
         $endOfMonth = Carbon::now()->endOfMonth();
 
         $monthlyIncomes = Finance::where('typ', 'Przychód')
-            ->whereBetween('data', [$startOfMonth, $endOfMonth])
+            ->whereDate('data', '>=', $startOfMonth)
+            ->whereDate('data', '<=', $endOfMonth)
             ->sum('kwota');
 
         $monthlyExpenses = Finance::where('typ', 'Wydatek')
-            ->whereBetween('data', [$startOfMonth, $endOfMonth])
+            ->whereDate('data', '>=', $startOfMonth)
+            ->whereDate('data', '<=', $endOfMonth)
             ->sum('kwota');
 
         $monthlyProfit = $monthlyIncomes - $monthlyExpenses;
 
-        // 🏠 Mieszkania do mapy
+        $pendingCount = Finance::where('status', 'pending')
+            ->whereMonth('data', $today->month)
+            ->whereYear('data', $today->year)
+            ->count();
+
         $mieszkania = Mieszkanie::all();
 
         return view('dashboard', compact(
@@ -75,7 +91,9 @@ class DashboardController extends Controller
             'monthlyIncomes',
             'monthlyExpenses',
             'monthlyProfit',
-            'mieszkania'
+            'mieszkania',
+            'pendingCount',
+            'nextDueDate'
         ));
     }
 }

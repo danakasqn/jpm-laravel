@@ -9,9 +9,10 @@ class Mieszkanie extends Model
 {
     use HasFactory;
 
-    // ✅ jawna nazwa tabeli
+    // ✅ Jawna nazwa tabeli
     protected $table = 'mieszkania';
 
+    // ✅ Pola do masowego wypełniania
     protected $fillable = [
         'miasto',
         'ulica',
@@ -19,23 +20,24 @@ class Mieszkanie extends Model
         'wspolnota',
         'telefon',
         'email',
-        'adres',    // ← dodane!
+        'adres',
+        'wlasciciel', // ✅ Imię i nazwisko właściciela
         'notatka',
     ];
 
-    // ✅ Relacja: jedno mieszkanie ma wielu mieszkańców
+    // ✅ Relacja: jedno mieszkanie ma wielu najemców
     public function residents()
     {
-        return $this->hasMany(Resident::class, 'apartment_id');
+        return $this->hasMany(\App\Models\Resident::class, 'apartment_id');
     }
 
     // ✅ Relacja: jedno mieszkanie ma wiele cyklicznych wpisów
     public function cyclicFinances()
     {
-        return $this->hasMany(CyclicFinance::class, 'apartment_id');
+        return $this->hasMany(\App\Models\CyclicFinance::class, 'apartment_id');
     }
 
-    // ✅ Wirtualny atrybut adresu
+    // ✅ Wirtualny atrybut pełnego adresu
     public function getAdresAttribute()
     {
         return "{$this->miasto}, {$this->ulica}";

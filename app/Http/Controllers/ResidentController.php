@@ -26,6 +26,7 @@ class ResidentController extends Controller
     {
         $validated = $request->validate([
             'imie_nazwisko' => 'required|string|max:255',
+            'wynajmujacy' => 'nullable|string|max:255', // ✅ dodane
             'apartment_id' => 'required|exists:mieszkania,id',
             'od_kiedy' => 'required|date',
             'do_kiedy' => 'nullable|date|after_or_equal:od_kiedy',
@@ -47,6 +48,7 @@ class ResidentController extends Controller
     {
         $validated = $request->validate([
             'imie_nazwisko' => 'required|string|max:255',
+            'wynajmujacy' => 'nullable|string|max:255', // ✅ dodane
             'apartment_id' => 'required|exists:mieszkania,id',
             'od_kiedy' => 'required|date',
             'do_kiedy' => 'nullable|date|after_or_equal:od_kiedy',

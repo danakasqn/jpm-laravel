@@ -67,12 +67,56 @@
             </a>
         </li>
 
+        {{-- Cykliczne --}}
         <li class="nav-item">
-            <a href="{{ route('cyclic-finances.index') }}"
-               class="nav-link d-flex align-items-center {{ request()->routeIs('cyclic-finances.*') ? 'active' : '' }}">
-                <i class="bi bi-arrow-repeat me-2"></i>
-                <span>Cykliczne</span>
+            <a class="nav-link d-flex align-items-center justify-content-between"
+               data-bs-toggle="collapse" href="#submenu-cykliczne" role="button"
+               aria-expanded="{{ request()->is('cyclic-finances*') ? 'true' : 'false' }}"
+               aria-controls="submenu-cykliczne">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-arrow-repeat me-2"></i>
+                    Cykliczne
+                </div>
             </a>
+            <div class="collapse {{ request()->is('cyclic-finances*') ? 'show' : '' }}" id="submenu-cykliczne">
+                <ul class="nav flex-column ms-3">
+                    <li class="nav-item">
+                        <a href="{{ route('cyclic-finances.index') }}"
+                           class="nav-link {{ request()->routeIs('cyclic-finances.index') ? 'active' : '' }}">
+                            Lista cyklicznych
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('cyclic-finances.urzad-skarbowy') }}"
+                           class="nav-link {{ request()->routeIs('cyclic-finances.urzad-skarbowy') ? 'active' : '' }}">
+                            Urząd Skarbowy
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </li>
+
+        {{-- 🔧 Ustawienia --}}
+        <li class="nav-item">
+            <a class="nav-link d-flex align-items-center justify-content-between"
+               data-bs-toggle="collapse" href="#submenu-ustawienia" role="button"
+               aria-expanded="{{ request()->is('ustawienia*') ? 'true' : 'false' }}"
+               aria-controls="submenu-ustawienia">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-gear-fill me-2"></i>
+                    Ustawienia
+                </div>
+            </a>
+            <div class="collapse {{ request()->is('ustawienia*') ? 'show' : '' }}" id="submenu-ustawienia">
+                <ul class="nav flex-column ms-3">
+                    <li class="nav-item">
+                        <a href="{{ route('settings.expense-types.index') }}"
+                           class="nav-link {{ request()->routeIs('settings.expense-types.*') ? 'active' : '' }}">
+                            Typy wydatków
+                        </a>
+                    </li>
+                </ul>
+            </div>
         </li>
 
     </ul>

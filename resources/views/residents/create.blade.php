@@ -10,7 +10,12 @@
                 @csrf
 
                 <div class="mb-3">
-                    <label class="form-label">Imię i nazwisko</label>
+                    <label class="form-label">Wynajmujący</label>
+                    <input type="text" name="wynajmujacy" class="form-control">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Najemca</label>
                     <input type="text" name="imie_nazwisko" class="form-control" required>
                 </div>
 
@@ -31,7 +36,7 @@
                         <input type="date" name="od_kiedy" class="form-control" required>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">Data zakończenia (opcjonalnie)</label>
+                        <label class="form-label">Data zakończenia</label>
                         <input type="date" name="do_kiedy" class="form-control">
                         <small class="text-muted">Pozostaw puste dla umowy na czas nieokreślony</small>
                     </div>

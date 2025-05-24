@@ -11,12 +11,14 @@ class Resident extends Model
 
     protected $fillable = [
         'imie_nazwisko',
+        'wynajmujacy',       // ✅ dodane
         'apartment_id',
         'od_kiedy',
         'do_kiedy',
-        'komentarz', // ✅ Dodane pole
+        'komentarz',
         'email',
         'phone',
+        'status',            // 💡 jeśli jest używane w aplikacji
     ];
 
     protected $dates = [

@@ -1,57 +1,108 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\HomeController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\MieszkanieController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ResidentController;
-use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CyclicFinanceController;
-use App\Http\Controllers\MapController;
+use App\Http\Controllers\ExpenseTypeController;
+use App\Models\ExpenseType;
+use App\Models\Mieszkanie;
+use App\Services\TaxService;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// 🌐 Strona powitalna
+Route::get('/', fn () => view('welcome'));
 
-// ✅ Dashboard
+// 📊 Dashboard
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
-// 🔐 Trasy dostępne tylko po zalogowaniu
+// 🔐 Sekcja dostępna po zalogowaniu
 Route::middleware(['auth'])->group(function () {
 
-    // ✅ Finanse – główna + formularz + operacje
-    Route::get('/finanse', [FinanceController::class, 'index'])->name('finanse.index');
-    Route::get('/finanse/formularz', [FinanceController::class, 'formularz'])->name('finanse.formularz');
-    Route::get('/finanse/operacje', [FinanceController::class, 'operacjeDoWykonania'])->name('finanse.operacje');
-    Route::patch('/finanse/zamknij/{id}', [FinanceController::class, 'oznaczJakoWykonane'])->name('finanse.zamknij');
+    // 💰 Finanse
+    Route::prefix('finanse')->name('finanse.')->group(function () {
+        Route::get('/', [FinanceController::class, 'index'])->name('index');
+        Route::get('/formularz', [FinanceController::class, 'formularz'])->name('formularz');
+        Route::get('/operacje', [FinanceController::class, 'operacjeDoWykonania'])->name('operacje');
+        Route::post('/zapisz', [FinanceController::class, 'zapisz'])->name('zapisz');
+        Route::get('/edytuj/{id}', [FinanceController::class, 'edytuj'])->name('edytuj');
+        Route::put('/aktualizuj/{id}', [FinanceController::class, 'aktualizuj'])->name('aktualizuj');
+        Route::patch('/zamknij/{id}', [FinanceController::class, 'oznaczJakoWykonane'])->name('zamknij');
+        Route::delete('/{id}', [FinanceController::class, 'usun'])->name('usun');
+    });
 
-    // ✅ Finanse – CRUD
-    Route::post('/finanse/zapisz', [FinanceController::class, 'zapisz'])->name('finanse.zapisz');
-    Route::get('/finanse/edytuj/{id}', [FinanceController::class, 'edytuj'])->name('finanse.edytuj');
-    Route::put('/finanse/aktualizuj/{id}', [FinanceController::class, 'aktualizuj'])->name('finanse.aktualizuj');
-    Route::delete('/finanse/{id}', [FinanceController::class, 'usun'])->name('finanse.usun');
+    // 🔁 Finanse cykliczne
+    Route::resource('cyclic-finances', CyclicFinanceController::class)->except(['show']);
+    Route::get('/cyclic-finances/urzad-skarbowy', [CyclicFinanceController::class, 'urzadSkarbowy'])->name('cyclic-finances.urzad-skarbowy');
 
-    // ✅ Finanse cykliczne
-    Route::resource('cyclic-finances', CyclicFinanceController::class);
+    // 🔄 API – Kategorie przychodów/wydatków
+    Route::get('/api/finanse/kategorie/{typ}', function ($typ) {
+    try {
+        $typ = ucfirst(strtolower($typ));
+        $dane = ExpenseType::whereRaw('LOWER(name) = ?', [strtolower($typ)])
+            ->get(['id', 'category']);
 
-    // ✅ Mieszkania
-    Route::get('/mieszkania', [MieszkanieController::class, 'index'])->name('mieszkania.index');
-    Route::post('/mieszkania/zapisz', [MieszkanieController::class, 'zapisz'])->name('mieszkania.zapisz');
-    Route::get('/mieszkania/edytuj/{id}', [MieszkanieController::class, 'edytuj'])->name('mieszkania.edytuj');
-    Route::put('/mieszkania/aktualizuj/{id}', [MieszkanieController::class, 'aktualizuj'])->name('mieszkania.aktualizuj');
-    Route::delete('/mieszkania/{id}', [MieszkanieController::class, 'usun'])->name('mieszkania.usun');
+        return response()->json(
+            $dane->map(fn($item) => [
+                'value' => $item->id,
+                'label' => $item->category,
+            ])->values()
+        );
+    } catch (\Throwable $e) {
+        Log::error('❌ Błąd w /api/finanse/kategorie:', ['error' => $e->getMessage()]);
+        return response()->json([], 500);
+    }
+    })->name('api.kategorie');
 
-    // ✅ Mieszkańcy
-    Route::resource('/residents', ResidentController::class);
+    // 📊 API – Dynamiczne przeliczenie podatku dla mieszkania
+    Route::get('/api/podatek', function (Request $request) {
+        $apartmentId = $request->query('apartment_id');
+        if (!$apartmentId) return response()->json(['amount' => null]);
 
-    // ✅ Profil użytkownika
+        $apartment = Mieszkanie::with('residents')->find($apartmentId);
+        $landlord = $apartment?->residents->last()?->wynajmujacy;
+        if (!$landlord) return response()->json(['amount' => null]);
+
+        $today = now();
+        $lastMonth = $today->copy()->subMonth();
+        $taxData = TaxService::getTaxBreakdownByLandlordAndApartment($today->year, $lastMonth->month);
+
+        $kwota = collect($taxData[$landlord]['mieszkania'] ?? [])
+            ->firstWhere('apartment_id', $apartmentId)['podatek'] ?? null;
+
+        return response()->json(['amount' => $kwota]);
+    })->name('api.podatek');
+
+    // 🏢 Lokale
+    Route::prefix('lokale')->name('mieszkania.')->group(function () {
+        Route::get('/', [MieszkanieController::class, 'index'])->name('index');
+        Route::post('/zapisz', [MieszkanieController::class, 'zapisz'])->name('zapisz');
+        Route::get('/{mieszkanie}/edytuj', [MieszkanieController::class, 'edytuj'])->name('edytuj');
+        Route::put('/{mieszkanie}', [MieszkanieController::class, 'aktualizuj'])->name('aktualizuj');
+        Route::delete('/{mieszkanie}', [MieszkanieController::class, 'usun'])->name('usun');
+    });
+
+    // 👥 Najemcy
+    Route::resource('residents', ResidentController::class);
+
+    // 👤 Profil użytkownika
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // ⚙️ Ustawienia – Typy operacji
+    Route::prefix('ustawienia')->name('settings.')->group(function () {
+        Route::resource('typy-wydatkow', ExpenseTypeController::class)
+            ->parameters(['typy-wydatkow' => 'typy_wydatkow'])
+            ->names('expense-types');
+    });
 });
 
-// ✅ Autoryzacja i rejestracja
+// 🔐 Autoryzacja (np. Breeze lub Jetstream)
 require __DIR__.'/auth.php';

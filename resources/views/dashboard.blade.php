@@ -1,14 +1,66 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid">
+<div class="container-fluid pt-4">
+
+    {{-- 🔽 Formularz z wyborem typu zakresu: miesiąc lub rok --}}
+    <form method="GET" class="row g-2 align-items-center mb-4">
+        <div class="col-auto">
+            <div class="input-group">
+                <span class="input-group-text bg-white">
+                    <i class="bi bi-funnel-fill text-primary"></i>
+                </span>
+                <select name="range_type" id="rangeType" class="form-select border-start-0">
+                    <option value="month" {{ $rangeType === 'month' ? 'selected' : '' }}>Miesiąc</option>
+                    <option value="year" {{ $rangeType === 'year' ? 'selected' : '' }}>Rok</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="col-auto" id="monthSelectGroup">
+            <div class="input-group">
+                <span class="input-group-text bg-white">
+                    <i class="bi bi-calendar-event-fill text-primary"></i>
+                </span>
+                <select name="month" class="form-select border-start-0">
+                    @foreach(range(1, 12) as $m)
+                        <option value="{{ $m }}" {{ $m == $month ? 'selected' : '' }}>
+                            {{ \Carbon\Carbon::create()->month($m)->translatedFormat('F') }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
+
+        <div class="col-auto">
+            <div class="input-group">
+                <span class="input-group-text bg-white">
+                    <i class="bi bi-calendar-range-fill text-primary"></i>
+                </span>
+                <select name="year" class="form-select border-start-0">
+                    @foreach(range(now()->year - 2, now()->year + 1) as $y)
+                        <option value="{{ $y }}" {{ $y == $year ? 'selected' : '' }}>{{ $y }}</option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
+
+        <div class="col-auto">
+            <button type="submit" class="btn btn-outline-primary shadow-sm px-4">
+                <i class="bi bi-arrow-repeat me-1"></i> Zastosuj
+            </button>
+        </div>
+    </form>
 
     {{-- === SEKCJA 1: Kafelki === --}}
-    <h5 class="mb-3 text-uppercase text-muted fw-bold">📊 Finanse – bieżący miesiąc</h5>
+    <h5 class="mb-3 text-uppercase text-muted fw-bold">
+        📊 Finanse – {{ $rangeType === 'year' ? 'cały rok ' . $year : \Carbon\Carbon::create($year, $month)->translatedFormat('F Y') }}
+    </h5>
+
     <div class="row g-4 mb-5">
         {{-- Przychody --}}
         <div class="col-md-6 col-xl-3">
-            <div class="card shadow-sm border-0">
+            <div class="card shadow-sm border-0 card-hover">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
@@ -19,14 +71,14 @@
                             <i class="bi bi-arrow-down-circle-fill fs-4 text-success"></i>
                         </div>
                     </div>
-                    <small class="text-success fw-semibold d-block mt-2">+{{ rand(3,8) }}% względem zeszłego miesiąca</small>
+                    <small class="text-success fw-semibold d-block mt-2">+{{ rand(3,8) }}% względem zeszłego okresu</small>
                 </div>
             </div>
         </div>
 
         {{-- Wydatki --}}
         <div class="col-md-6 col-xl-3">
-            <div class="card shadow-sm border-0">
+            <div class="card shadow-sm border-0 card-hover">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
@@ -37,14 +89,14 @@
                             <i class="bi bi-arrow-up-circle-fill fs-4 text-danger"></i>
                         </div>
                     </div>
-                    <small class="text-danger fw-semibold d-block mt-2">-{{ rand(4,10) }}% względem zeszłego miesiąca</small>
+                    <small class="text-danger fw-semibold d-block mt-2">-{{ rand(4,10) }}% względem zeszłego okresu</small>
                 </div>
             </div>
         </div>
 
         {{-- Dochód --}}
         <div class="col-md-6 col-xl-3">
-            <div class="card shadow-sm border-0">
+            <div class="card shadow-sm border-0 card-hover">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
@@ -56,7 +108,7 @@
                         </div>
                     </div>
                     <small class="text-primary fw-semibold d-block mt-2">
-                        {{ $monthlyProfit >= 0 ? '+' : '' }}{{ rand(1,5) }}% względem zeszłego miesiąca
+                        {{ $monthlyProfit >= 0 ? '+' : '' }}{{ rand(1,5) }}% względem zeszłego okresu
                     </small>
                 </div>
             </div>
@@ -64,7 +116,7 @@
 
         {{-- Najemcy --}}
         <div class="col-md-6 col-xl-3">
-            <div class="card shadow-sm border-0">
+            <div class="card shadow-sm border-0 card-hover">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
@@ -143,4 +195,31 @@
         </div>
     </div>
 </div>
+
+{{-- 🔧 Dynamiczne ukrywanie pola miesiąca jeśli wybrano "rok" --}}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const rangeType = document.getElementById('rangeType');
+        const monthGroup = document.getElementById('monthSelectGroup');
+
+        function toggleMonthField() {
+            if (rangeType.value === 'year') {
+                monthGroup.style.display = 'none';
+            } else {
+                monthGroup.style.display = 'block';
+            }
+        }
+
+        rangeType.addEventListener('change', toggleMonthField);
+        toggleMonthField(); // wywołanie na starcie
+    });
+</script>
+
+<style>
+.card-hover:hover {
+    transform: scale(1.02);
+    transition: 0.2s ease-in-out;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.06);
+}
+</style>
 @endsection

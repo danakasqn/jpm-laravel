@@ -17,6 +17,16 @@
 
                 <div class="row g-3">
                     <div class="col-md-4">
+                        <label class="form-label">Wynajmujący</label>
+                        <input type="text" name="wynajmujacy" class="form-control">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Najemca</label>
+                        <input type="text" name="imie_nazwisko" class="form-control" required>
+                    </div>
+
+                    <div class="col-md-4">
                         <label class="form-label">Mieszkanie</label>
                         <select name="apartment_id" class="form-select" required>
                             @foreach($mieszkania as $mieszkanie)
@@ -25,11 +35,6 @@
                                 </option>
                             @endforeach
                         </select>
-                    </div>
-
-                    <div class="col-md-4">
-                        <label class="form-label">Imię i nazwisko</label>
-                        <input type="text" name="imie_nazwisko" class="form-control" required>
                     </div>
 
                     <div class="col-md-2">
@@ -64,8 +69,9 @@
                 <table class="table table-striped align-middle text-center m-0">
                     <thead class="table-light">
                         <tr>
-                            <th>Mieszkanie</th>
-                            <th>Imię i nazwisko</th>
+                            <th>Wynajmujący</th>
+                            <th>Najemca</th>
+                            <th>Lokal</th>
                             <th>Od</th>
                             <th>Do</th>
                             <th>Komentarz</th>
@@ -76,8 +82,9 @@
                     <tbody>
                         @forelse($residents as $r)
                             <tr>
-                                <td>{{ $r->apartment->miasto }}, {{ $r->apartment->ulica }}</td>
+                                <td>{{ $r->wynajmujacy ?? '—' }}</td>
                                 <td>{{ $r->imie_nazwisko }}</td>
+                                <td>{{ $r->apartment->miasto }}, {{ $r->apartment->ulica }}</td>
                                 <td>{{ $r->od_kiedy }}</td>
                                 <td>{{ $r->do_kiedy ?? '—' }}</td>
                                 <td class="text-start">
@@ -111,7 +118,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-muted">Brak najemców.</td>
+                                <td colspan="8" class="text-muted">Brak najemców.</td>
                             </tr>
                         @endforelse
                     </tbody>

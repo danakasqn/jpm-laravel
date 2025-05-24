@@ -13,15 +13,26 @@ return new class extends Migration
     {
         Schema::create('cyclic_finances', function (Blueprint $table) {
             $table->id();
-            $table->string('title'); // np. "Urząd Skarbowy"
-            $table->enum('type', ['income', 'expense']);
-            $table->integer('due_day'); // np. 10 (dzień miesiąca)
 
-            // Poprawny klucz obcy do tabeli "mieszkania"
+            // Relacja do typów wydatków (np. "Przychód" / "Wydatek" + kategoria)
+            $table->foreignId('expense_type_id')
+                  ->constrained('expense_types')
+                  ->cascadeOnDelete();
+
+            // Typ operacji: Przychód lub Wydatek
+            $table->enum('type', ['Przychód', 'Wydatek']);
+
+            // Dzień miesiąca, np. 10
+            $table->unsignedTinyInteger('due_day');
+
+            // Powiązane mieszkanie
             $table->foreignId('apartment_id')
-                ->nullable()
-                ->constrained('mieszkania')
-                ->nullOnDelete();
+                  ->nullable()
+                  ->constrained('mieszkania')
+                  ->nullOnDelete();
+
+            // Kwota może być pusta (np. dla podatku liczonego dynamicznie)
+            $table->decimal('amount', 10, 2)->nullable();
 
             $table->timestamps();
         });

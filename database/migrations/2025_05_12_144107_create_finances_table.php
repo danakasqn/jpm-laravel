@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('finances', function (Blueprint $table) {
@@ -17,30 +14,24 @@ return new class extends Migration
             // Powiązania
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('apartment_id')->nullable();
+            $table->unsignedBigInteger('expense_type_id');
 
             // Dane finansowe
             $table->date('data');
             $table->string('typ'); // Przychód lub Wydatek
             $table->decimal('kwota', 10, 2);
-            $table->string('kategoria')->nullable();
+            $table->string('kategoria')->nullable(); // Można usunąć, jeśli jest zbędna
             $table->text('notatka')->nullable();
 
             $table->timestamps();
 
             // Relacje (klucze obce)
-            $table->foreign('user_id')
-                ->references('id')->on('users')
-                ->onDelete('cascade');
-
-            $table->foreign('apartment_id')
-                ->references('id')->on('mieszkania')
-                ->onDelete('set null');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('apartment_id')->references('id')->on('mieszkania')->onDelete('set null');
+            $table->foreign('expense_type_id')->references('id')->on('expense_types')->onDelete('restrict');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('finances');

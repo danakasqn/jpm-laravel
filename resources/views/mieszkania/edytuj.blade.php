@@ -22,6 +22,10 @@
 
                 <div class="row g-3">
                     <div class="col-md-3">
+                        <label class="form-label">Właściciel</label>
+                        <input type="text" name="wlasciciel" value="{{ old('wlasciciel', $mieszkanie->wlasciciel) }}" class="form-control">
+                    </div>
+                    <div class="col-md-3">
                         <label class="form-label">Miasto</label>
                         <input type="text" name="miasto" value="{{ old('miasto', $mieszkanie->miasto) }}" class="form-control" required>
                     </div>

@@ -11,8 +11,13 @@
                 @method('PUT')
 
                 <div class="mb-3">
-                    <label class="form-label">Imię i nazwisko</label>
-                    <input type="text" name="imie_nazwisko" value="{{ $resident->imie_nazwisko }}" class="form-control" required>
+                    <label class="form-label">Wynajmujący</label>
+                    <input type="text" name="wynajmujacy" value="{{ old('wynajmujacy', $resident->wynajmujacy) }}" class="form-control">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Najemca</label>
+                    <input type="text" name="imie_nazwisko" value="{{ old('imie_nazwisko', $resident->imie_nazwisko) }}" class="form-control" required>
                 </div>
 
                 <div class="mb-3">
@@ -29,11 +34,11 @@
                 <div class="row mb-3 g-3">
                     <div class="col-md-6">
                         <label class="form-label">Data rozpoczęcia</label>
-                        <input type="date" name="od_kiedy" value="{{ $resident->od_kiedy }}" class="form-control" required>
+                        <input type="date" name="od_kiedy" value="{{ old('od_kiedy', $resident->od_kiedy) }}" class="form-control" required>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Data zakończenia</label>
-                        <input type="date" name="do_kiedy" value="{{ $resident->do_kiedy }}" class="form-control">
+                        <input type="date" name="do_kiedy" value="{{ old('do_kiedy', $resident->do_kiedy) }}" class="form-control">
                     </div>
                 </div>
 

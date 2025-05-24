@@ -7,14 +7,28 @@ use App\Models\Finance;
 use App\Models\Mieszkanie;
 use App\Models\CyclicFinance;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $rangeType = $request->input('range_type', 'month'); // 'month' or 'year'
+        $month = $request->input('month', Carbon::now()->month);
+        $year = $request->input('year', Carbon::now()->year);
+
         $today = Carbon::today();
-        $soon = $today->copy()->addDays(14);
         $appStartDate = Carbon::create(2025, 5, 1)->startOfMonth();
+        $soon = $today->copy()->addDays(14);
+
+        // Zakres daty
+        if ($rangeType === 'year') {
+            $startOfPeriod = Carbon::create($year)->startOfYear();
+            $endOfPeriod = Carbon::create($year)->endOfYear();
+        } else {
+            $startOfPeriod = Carbon::create($year, $month)->startOfMonth();
+            $endOfPeriod = Carbon::create($year, $month)->endOfMonth();
+        }
 
         // Umowy kończące się w ciągu 14 dni
         $endingSoonResidents = Resident::with('apartment')
@@ -29,16 +43,18 @@ class DashboardController extends Controller
         $endMonth = $today->copy()->startOfMonth();
 
         while ($currentMonth->lte($endMonth)) {
-            $startOfMonth = $currentMonth->copy()->startOfMonth()->toDateString();
-            $endOfMonth = $currentMonth->copy()->endOfMonth()->toDateString();
+            $start = $currentMonth->copy()->startOfMonth()->toDateString();
+            $end = $currentMonth->copy()->endOfMonth()->toDateString();
 
-            $cyclicFinances = CyclicFinance::with('apartment')
+            $cyclicFinances = CyclicFinance::with(['apartment', 'expenseType'])
                 ->get()
-                ->filter(function ($cyclic) use ($startOfMonth, $endOfMonth) {
-                    return !Finance::whereRaw('LOWER(kategoria) = ?', [strtolower($cyclic->title)])
-                        ->where('typ', $cyclic->type === 'income' ? 'Przychód' : 'Wydatek')
+                ->filter(function ($cyclic) use ($start, $end) {
+                    return !Finance::where('typ', $cyclic->type === 'income' ? 'Przychód' : 'Wydatek')
                         ->where('apartment_id', $cyclic->apartment_id)
-                        ->whereBetween('data', [$startOfMonth, $endOfMonth])
+                        ->whereBetween('data', [$start, $end])
+                        ->whereHas('expenseType', fn($q) =>
+                            $q->whereRaw('LOWER(name) = ?', [strtolower(optional($cyclic->expenseType)->name)])
+                        )
                         ->exists();
                 })
                 ->map(function ($cyclic) use ($currentMonth) {
@@ -53,34 +69,26 @@ class DashboardController extends Controller
         }
 
         $nextDueDate = $missingCyclicFinances
-            ->sortBy(function ($item) {
-                return $item['month']->copy()->setDay($item['cyclic']->due_day);
-            })
+            ->sortBy(fn($item) => $item['month']->copy()->setDay($item['cyclic']->due_day))
             ->first();
 
         $nextDueDate = $nextDueDate
             ? $nextDueDate['month']->copy()->setDay($nextDueDate['cyclic']->due_day)->format('d.m.Y')
             : '—';
 
-        // Statystyki bieżącego miesiąca
-        $startOfMonth = Carbon::now()->startOfMonth();
-        $endOfMonth = Carbon::now()->endOfMonth();
-
+        // Statystyki finansowe
         $monthlyIncomes = Finance::where('typ', 'Przychód')
-            ->whereDate('data', '>=', $startOfMonth)
-            ->whereDate('data', '<=', $endOfMonth)
+            ->whereBetween('data', [$startOfPeriod, $endOfPeriod])
             ->sum('kwota');
 
         $monthlyExpenses = Finance::where('typ', 'Wydatek')
-            ->whereDate('data', '>=', $startOfMonth)
-            ->whereDate('data', '<=', $endOfMonth)
+            ->whereBetween('data', [$startOfPeriod, $endOfPeriod])
             ->sum('kwota');
 
         $monthlyProfit = $monthlyIncomes - $monthlyExpenses;
 
         $pendingCount = Finance::where('status', 'pending')
-            ->whereMonth('data', $today->month)
-            ->whereYear('data', $today->year)
+            ->whereBetween('data', [$startOfPeriod, $endOfPeriod])
             ->count();
 
         $mieszkania = Mieszkanie::all();
@@ -93,7 +101,10 @@ class DashboardController extends Controller
             'monthlyProfit',
             'mieszkania',
             'pendingCount',
-            'nextDueDate'
+            'nextDueDate',
+            'month',
+            'year',
+            'rangeType'
         ));
     }
 }

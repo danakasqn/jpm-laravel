@@ -15,6 +15,10 @@
             <form method="POST" action="{{ route('mieszkania.zapisz') }}">
                 @csrf
                 <div class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label">Właściciel</label>
+                        <input type="text" name="wlasciciel" class="form-control">
+                    </div>
                     <div class="col-md-2">
                         <label class="form-label">Miasto</label>
                         <input type="text" name="miasto" class="form-control" required>
@@ -60,6 +64,7 @@
             <table class="table table-striped align-middle text-center m-0">
                 <thead class="table-light">
                     <tr>
+                        <th>Właściciel</th>
                         <th>Miasto</th>
                         <th>Ulica</th>
                         <th>Metraż</th>
@@ -73,6 +78,7 @@
                 <tbody>
                     @forelse($mieszkania as $m)
                         <tr>
+                            <td>{{ $m->wlasciciel }}</td>
                             <td>{{ $m->miasto }}</td>
                             <td>{{ $m->ulica }}</td>
                             <td>{{ $m->metraz }} m²</td>
@@ -95,7 +101,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="text-muted">Brak lokali</td>
+                            <td colspan="9" class="text-muted">Brak lokali</td>
                         </tr>
                     @endforelse
                 </tbody>

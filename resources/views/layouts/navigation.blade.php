@@ -5,7 +5,7 @@
     }
 </style>
 
-<nav id="sidebar" class="d-flex flex-column gap-2 flex-grow-1" role="navigation">
+<nav id="nav-sidebar" class="d-flex flex-column gap-2 flex-grow-1" role="navigation">
     <ul class="nav flex-column">
 
         <li class="nav-item">

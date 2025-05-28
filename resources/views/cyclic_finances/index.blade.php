@@ -21,11 +21,10 @@
                             <option value="">Bez przypisania</option>
                             @foreach($apartments as $apartment)
                                 <option 
-    value="{{ $apartment->id }}" 
-    data-wynajmujacy="{{ $apartment->residents->first()?->wynajmujacy ?? 'Brak danych' }}">
-    {{ $apartment->miasto }}, {{ $apartment->ulica }}
-</option>
-
+                                    value="{{ $apartment->id }}" 
+                                    data-wynajmujacy="{{ $apartment->residents->first()?->wynajmujacy ?? 'Brak danych' }}">
+                                    {{ $apartment->miasto }}, {{ $apartment->ulica }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
@@ -49,6 +48,11 @@
                         <select name="expense_type_id" class="form-select" id="kategoria-cykliczna" required>
                             <option value="">Najpierw wybierz typ</option>
                         </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label">Tytuł</label>
+                        <input type="text" name="title" class="form-control" value="{{ old('title') }}" required placeholder="Np. Czynsz, Prąd">
                     </div>
 
                     <div class="col-md-1">
@@ -81,6 +85,7 @@
                             <th>Wynajmujący</th>
                             <th>Typ</th>
                             <th>Kategoria</th>
+                            <th>Tytuł</th>
                             <th>Dzień</th>
                             <th>Kwota</th>
                             <th>Akcje</th>
@@ -91,28 +96,29 @@
                             <tr>
                                 <td>{{ $cf->apartment->miasto ?? '-' }}, {{ $cf->apartment->ulica ?? '' }}</td>
                                 <td>
-    @if($cf->apartment && $cf->apartment->residents->last())
-        {{ $cf->apartment->residents->last()->wynajmujacy }}
-    @else
-        -
-    @endif
-</td>
+                                    @if($cf->apartment && $cf->apartment->residents->last())
+                                        {{ $cf->apartment->residents->last()->wynajmujacy }}
+                                    @else
+                                        -
+                                    @endif
+                                </td>
                                 <td>
                                     <span class="badge bg-{{ $cf->type === 'Przychód' ? 'success' : 'danger' }}">
                                         {{ $cf->type }}
                                     </span>
                                 </td>
                                 <td>{{ $cf->expenseType?->category ?? '—' }}</td>
+                                <td>{{ $cf->title }}</td>
                                 <td>{{ $cf->due_day }}</td>
                                 <td>
-    @if($cf->expenseType?->category === 'Urząd Skarbowy')
-        <span class="text-muted">Obliczany dynamicznie</span>
-    @elseif($cf->amount !== null)
-        {{ number_format($cf->amount, 2) }} zł
-    @else
-        —
-    @endif
-</td>
+                                    @if($cf->expenseType?->category === 'Urząd Skarbowy')
+                                        <span class="text-muted">Obliczany dynamicznie</span>
+                                    @elseif($cf->amount !== null)
+                                        {{ number_format($cf->amount, 2) }} zł
+                                    @else
+                                        —
+                                    @endif
+                                </td>
                                 <td>
                                     <a href="{{ route('cyclic-finances.edit', $cf) }}" class="btn btn-sm btn-outline-primary">✏️</a>
                                     <form action="{{ route('cyclic-finances.destroy', $cf) }}" method="POST" class="d-inline" onsubmit="return confirm('Usunąć wpis?')">
@@ -124,7 +130,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-muted">Brak danych</td>
+                                <td colspan="8" class="text-muted">Brak danych</td>
                             </tr>
                         @endforelse
                     </tbody>

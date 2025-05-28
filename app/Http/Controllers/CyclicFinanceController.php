@@ -11,20 +11,18 @@ use App\Services\TaxService;
 class CyclicFinanceController extends Controller
 {
     public function index()
-{
-    $cyclicFinances = CyclicFinance::with(['apartment.residents', 'expenseType'])->latest()->get();
+    {
+        $cyclicFinances = CyclicFinance::with(['apartment.residents', 'expenseType'])->latest()->get();
+        $apartments = Mieszkanie::with(['residents' => fn($q) => $q->orderByDesc('created_at')])->get();
+        $expenseTypes = ExpenseType::all();
 
-    $apartments = Mieszkanie::with(['residents' => fn($q) => $q->orderByDesc('created_at')])->get();
-
-    $expenseTypes = ExpenseType::all();
-
-    return view('cyclic_finances.index', compact('cyclicFinances', 'apartments', 'expenseTypes'));
-}
-
+        return view('cyclic_finances.index', compact('cyclicFinances', 'apartments', 'expenseTypes'));
+    }
 
     public function store(Request $request)
     {
         $request->validate([
+            'title' => 'required|string|max:255', // 🔧 dodana walidacja
             'expense_type_id' => 'required|exists:expense_types,id',
             'type' => 'required|in:Przychód,Wydatek',
             'due_day' => 'required|integer|min:1|max:31',
@@ -32,7 +30,7 @@ class CyclicFinanceController extends Controller
             'amount' => 'nullable|numeric|min:0',
         ]);
 
-        CyclicFinance::create($request->only('expense_type_id', 'type', 'due_day', 'apartment_id', 'amount'));
+        CyclicFinance::create($request->only('title', 'expense_type_id', 'type', 'due_day', 'apartment_id', 'amount'));
 
         return redirect()->route('cyclic-finances.index')->with('success', 'Dodano cykliczny wpis.');
     }
@@ -48,6 +46,7 @@ class CyclicFinanceController extends Controller
     public function update(Request $request, CyclicFinance $cyclicFinance)
     {
         $request->validate([
+            'title' => 'required|string|max:255', // 🔧 dodana walidacja
             'expense_type_id' => 'required|exists:expense_types,id',
             'type' => 'required|in:Przychód,Wydatek',
             'due_day' => 'required|integer|min:1|max:31',
@@ -55,7 +54,7 @@ class CyclicFinanceController extends Controller
             'amount' => 'nullable|numeric|min:0',
         ]);
 
-        $cyclicFinance->update($request->only('expense_type_id', 'type', 'due_day', 'apartment_id', 'amount'));
+        $cyclicFinance->update($request->only('title', 'expense_type_id', 'type', 'due_day', 'apartment_id', 'amount'));
 
         return redirect()->route('cyclic-finances.index')->with('success', 'Zaktualizowano wpis.');
     }

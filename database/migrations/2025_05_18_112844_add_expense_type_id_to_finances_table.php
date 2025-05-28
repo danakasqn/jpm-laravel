@@ -7,15 +7,15 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::table('finances', function (Blueprint $table) {
-            $table->unsignedBigInteger('expense_type_id')->nullable()->after('id');
-        });
+       // Schema::table('finances', function (Blueprint $table) {
+        //    $table->unsignedBigInteger('expense_type_id')->nullable()->after('id');
+       // });
     }
 
     public function down(): void
     {
-        Schema::table('finances', function (Blueprint $table) {
-            $table->dropColumn('expense_type_id');
-        });
+       // Schema::table('finances', function (Blueprint $table) {
+        //    $table->dropColumn('expense_type_id');
+      //  });
     }
 };

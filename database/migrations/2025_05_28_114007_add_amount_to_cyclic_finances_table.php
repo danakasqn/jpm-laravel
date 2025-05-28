@@ -9,12 +9,14 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
-    {
-     //   Schema::table('cyclic_finances', function (Blueprint $table) {
-     //       $table->decimal('amount', 10, 2)->nullable()->after('due_day');
-     //   });
-    }
+public function up(): void
+{
+    Schema::table('cyclic_finances', function (Blueprint $table) {
+        if (!Schema::hasColumn('cyclic_finances', 'amount')) {
+    $table->decimal('amount', 10, 2)->nullable();
+}
+    });
+}
 
     /**
      * Reverse the migrations.

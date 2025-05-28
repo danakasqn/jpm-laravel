@@ -5,7 +5,7 @@
     }
 </style>
 
-<nav id="nav-sidebar" class="d-flex flex-column gap-2 flex-grow-1" role="navigation">
+<nav id="sidebar" class="d-flex flex-column gap-2 flex-grow-1" role="navigation">
     <ul class="nav flex-column">
 
         <li class="nav-item">
@@ -17,21 +17,20 @@
         </li>
 
         {{-- Finanse --}}
-        @php $finanseOpen = request()->is('finanse*') || request()->routeIs('finanse.*'); @endphp
+        @php $finanseOpen = request()->routeIs('finanse.*'); @endphp
         <li class="nav-item">
             <a class="nav-link d-flex align-items-center justify-content-between"
                data-bs-toggle="collapse" href="#submenu-finanse" role="button"
                aria-expanded="{{ $finanseOpen ? 'true' : 'false' }}"
                aria-controls="submenu-finanse">
                 <div class="d-flex align-items-center">
-                    <i class="bi bi-cash-coin me-2"></i>
-                    Finanse
+                    <i class="bi bi-cash-coin me-2"></i> Finanse
                 </div>
                 @if(isset($pendingCount) && $pendingCount > 0)
                     <span class="badge bg-danger ms-2 badge-sm">{{ $pendingCount }}</span>
                 @endif
             </a>
-            <div class="collapse {{ $finanseOpen ? 'show' : '' }}" id="submenu-finanse">
+            <div class="collapse {{ $finanseOpen ? 'show' : '' }}" id="submenu-finanse" data-bs-parent="#sidebar">
                 <ul class="nav flex-column ms-3">
                     <li class="nav-item">
                         <a href="{{ route('finanse.formularz') }}"
@@ -69,18 +68,17 @@
         </li>
 
         {{-- Cykliczne --}}
-        @php $cykliczneOpen = request()->is('cyclic-finances*') || request()->routeIs('cyclic-finances.*'); @endphp
+        @php $cykliczneOpen = request()->routeIs('cyclic-finances.*'); @endphp
         <li class="nav-item">
             <a class="nav-link d-flex align-items-center justify-content-between"
                data-bs-toggle="collapse" href="#submenu-cykliczne" role="button"
                aria-expanded="{{ $cykliczneOpen ? 'true' : 'false' }}"
                aria-controls="submenu-cykliczne">
                 <div class="d-flex align-items-center">
-                    <i class="bi bi-arrow-repeat me-2"></i>
-                    Cykliczne
+                    <i class="bi bi-arrow-repeat me-2"></i> Cykliczne
                 </div>
             </a>
-            <div class="collapse {{ $cykliczneOpen ? 'show' : '' }}" id="submenu-cykliczne">
+            <div class="collapse {{ $cykliczneOpen ? 'show' : '' }}" id="submenu-cykliczne" data-bs-parent="#sidebar">
                 <ul class="nav flex-column ms-3">
                     <li class="nav-item">
                         <a href="{{ route('cyclic-finances.index') }}"
@@ -98,19 +96,18 @@
             </div>
         </li>
 
-        {{-- 🔧 Ustawienia --}}
-        @php $ustawieniaOpen = request()->is('ustawienia*') || request()->routeIs('settings.*'); @endphp
+        {{-- Ustawienia --}}
+        @php $ustawieniaOpen = request()->routeIs('settings.*'); @endphp
         <li class="nav-item">
             <a class="nav-link d-flex align-items-center justify-content-between"
                data-bs-toggle="collapse" href="#submenu-ustawienia" role="button"
                aria-expanded="{{ $ustawieniaOpen ? 'true' : 'false' }}"
                aria-controls="submenu-ustawienia">
                 <div class="d-flex align-items-center">
-                    <i class="bi bi-gear-fill me-2"></i>
-                    Ustawienia
+                    <i class="bi bi-gear-fill me-2"></i> Ustawienia
                 </div>
             </a>
-            <div class="collapse {{ $ustawieniaOpen ? 'show' : '' }}" id="submenu-ustawienia">
+            <div class="collapse {{ $ustawieniaOpen ? 'show' : '' }}" id="submenu-ustawienia" data-bs-parent="#sidebar">
                 <ul class="nav flex-column ms-3">
                     <li class="nav-item">
                         <a href="{{ route('settings.expense-types.index') }}"

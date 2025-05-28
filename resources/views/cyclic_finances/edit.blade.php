@@ -60,12 +60,6 @@
                         </select>
                     </div>
 
-                    <div class="col-md-4">
-                        <label class="form-label">Tytuł</label>
-                        <input type="text" name="title" class="form-control"
-                               value="{{ old('title', $cyclicFinance->title) }}" required placeholder="Np. Czynsz, Prąd">
-                    </div>
-
                     <div class="col-md-3">
                         <label class="form-label">Kwota (PLN)</label>
                         <input type="number" name="amount" class="form-control"

@@ -90,7 +90,13 @@
                         @forelse($cyclicFinances as $cf)
                             <tr>
                                 <td>{{ $cf->apartment->miasto ?? '-' }}, {{ $cf->apartment->ulica ?? '' }}</td>
-                                <td>{{ $cf->apartment->residents->last()?->wynajmujacy ?? '—' }}</td>
+                                <td>
+    @if($cf->apartment && $cf->apartment->residents->last())
+        {{ $cf->apartment->residents->last()->wynajmujacy }}
+    @else
+        -
+    @endif
+</td>
                                 <td>
                                     <span class="badge bg-{{ $cf->type === 'Przychód' ? 'success' : 'danger' }}">
                                         {{ $cf->type }}

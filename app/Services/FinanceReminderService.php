@@ -103,7 +103,11 @@ class FinanceReminderService
 
         // ✅ Jeśli to Urząd Skarbowy – podmień kwotę na dynamiczną
         if (strtolower($cykliczny->expenseType->category) === 'urząd skarbowy') {
-            $landlord = $cykliczny->apartment->residents->first()?->wynajmujacy;
+            $landlord = null;
+
+if ($cykliczny->apartment && $cykliczny->apartment->residents->isNotEmpty()) {
+    $landlord = $cykliczny->apartment->residents->first()->wynajmujacy;
+}
             $apartmentId = $cykliczny->apartment_id;
 
             $taxData = TaxService::getTaxBreakdownByLandlordAndApartment($today->year, $lastMonth->month);

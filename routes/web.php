@@ -16,7 +16,6 @@ use App\Services\TaxService;
 
 // 🌐 Strona powitalna
 Route::get('/', fn () => view('welcome'));
-Route::get('/sampscreens', fn () => view('sampscreens'));
 
 // 📊 Dashboard
 Route::get('/dashboard', [DashboardController::class, 'index'])
